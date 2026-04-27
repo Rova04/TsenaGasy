@@ -1,0 +1,265 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+//
+// ==========================
+// USERS
+// ==========================
+model Utilisateur {
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  supabaseId String      @unique @db.Uuid
+  email      String      @unique
+  adresse    String
+  nom        String
+  tel        String      @db.VarChar(15)
+  createdAt  DateTime    @default(now())
+  lastLogin  DateTime?
+  role       String      @default("client") // modifiable via le back
+  magasins   Magasin[]
+  paniers    Panier[]
+  livraisons Livraison[] @relation("LivreurLivraison")
+
+  favoris Favori[]
+  Vente   Vente[]
+
+  @@map("users")
+}
+
+//
+// ==========================
+// MAGASIN
+// ==========================
+model Magasin {
+  id_magasin      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nom_Magasin     String
+  type            String
+  id_proprietaire String @db.Uuid
+  statut          String @default("en-attente")
+
+  stripeAccountId String? @unique
+
+  proprietaire Utilisateur  @relation(fields: [id_proprietaire], references: [id])
+  produits     Produit[]
+  LigneVente   LigneVente[]
+
+  @@map("magasins")
+}
+
+//
+// ==========================
+// CATEGORIES
+// ==========================
+model Categorie {
+  id       String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nomCat   String
+  produits Produit[]
+
+  @@map("categories")
+}
+
+//
+// ==========================
+// PRODUITS
+// ==========================
+model Produit {
+  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nom             String
+  prix            Decimal          @db.Decimal(12, 2)
+  stock           Int              @default(0)
+  images          String[]         @db.Text
+  tags            String[]         @db.Text
+  descriptions    String
+  poids           Int              @default(0)
+  dimensions      String           @default("")
+  materiaux       String           @default("")
+  isLocation      Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  statut          String           @default("en attente")
+  categorieId     String           @db.Uuid
+  categorie       Categorie        @relation(fields: [categorieId], references: [id])
+  magasinId       String           @db.Uuid
+  magasin         Magasin          @relation(fields: [magasinId], references: [id_magasin])
+  lignePaniers    LignePanier[]
+  produitLocation ProduitLocation?
+  Sponsor         Sponsor?         @relation("ProduitSponsor")
+
+  favoris    Favori[]
+  LigneVente LigneVente[]
+
+  @@map("produits")
+}
+
+//
+// ==========================
+// PRODUIT LOCATION
+// ==========================
+model ProduitLocation {
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  caution    Decimal @db.Decimal(12, 2)
+  duree_min  Int
+  disponible Boolean @default(true)
+  typePrix   String // journalier | hebdomadaire | mensuel
+  lieuRecup  String
+  produitId  String  @unique @db.Uuid
+  produit    Produit @relation(fields: [produitId], references: [id], onDelete: Cascade)
+
+  @@map("produit_location")
+}
+
+model Sponsor {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  statut    String    @default("en_attente") // en_attente | validé | refusé
+  dateDebut DateTime?
+  dateFin   DateTime?
+  produitId String    @unique @db.Uuid
+  produit   Produit   @relation("ProduitSponsor", fields: [produitId], references: [id], onDelete: Cascade)
+
+  @@map("sponsors")
+}
+
+//
+// ==========================
+// PANIER
+// ==========================
+model Panier {
+  id       String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  idClient String        @unique @db.Uuid
+  client   Utilisateur   @relation(fields: [idClient], references: [id])
+  lignes   LignePanier[]
+  ventes   Vente[]
+
+  @@map("paniers")
+}
+
+//
+// ==========================
+// LIGNE PANIER
+// ==========================
+model LignePanier {
+  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  quantite      Int
+  prix_Unitaire Decimal @db.Decimal(12, 2)
+  total         Decimal @db.Decimal(12, 2)
+  idProduit     String  @db.Uuid
+  idPanier      String  @db.Uuid
+  produit       Produit @relation(fields: [idProduit], references: [id], onDelete: Cascade)
+  panier        Panier  @relation(fields: [idPanier], references: [id], onDelete: Cascade)
+
+  @@unique([idPanier, idProduit])
+  @@map("ligne_panier")
+}
+
+//
+// ==========================
+// FAVORI
+// ==========================
+model Favori {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @db.Uuid
+  produitId String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  user    Utilisateur @relation(fields: [userId], references: [id], onDelete: Cascade)
+  produit Produit     @relation(fields: [produitId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, produitId]) // empêche doublons
+  @@map("favoris")
+}
+
+//
+// ==========================
+// VENTE
+// ==========================
+model Vente {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  dateVente DateTime @default(now())
+  total     Decimal  @db.Decimal(12, 2)
+  statut    String   @default("en_preparation")
+  idPanier  String   @db.Uuid
+
+  facture_numero String? @unique
+  facture_url    String?
+
+  archivedByClient Boolean @default(false)
+
+  idUser String      @db.Uuid
+  user   Utilisateur @relation(fields: [idUser], references: [id])
+  panier Panier      @relation(fields: [idPanier], references: [id])
+
+  paiement  Paiement?
+  livraison Livraison?
+
+  lignes LigneVente[]
+
+  @@map("ventes")
+}
+
+model LigneVente {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  venteId   String @db.Uuid
+  produitId String @db.Uuid
+  magasinId String @db.Uuid
+
+  quantite      Int
+  prix_Unitaire Decimal @db.Decimal(12, 2)
+  total         Decimal @db.Decimal(12, 2)
+
+  depotOk          Boolean   @default(false) // admin a reçu ces articles
+  depotAt          DateTime?
+  archivedByVendor Boolean   @default(false)
+
+  vente   Vente   @relation(fields: [venteId], references: [id], onDelete: Cascade)
+  produit Produit @relation(fields: [produitId], references: [id])
+  magasin Magasin @relation(fields: [magasinId], references: [id_magasin])
+
+  @@unique([venteId, produitId])
+  @@map("ligne_vente")
+}
+
+//
+// ==========================
+// LIVRAISON
+// ==========================
+model Livraison {
+  id                String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  adresse_livraison String
+  contact_phone     String       @db.VarChar(20)
+  mode              String // standard | express | point relais
+  date_prevue       DateTime?
+  date_effective    DateTime?
+  statut            String       @default("préparée") // modifiable
+  paiement_collecte Boolean      @default(false)
+  frais_livraison   Decimal      @db.Decimal(12, 2)
+  idVente           String       @unique @db.Uuid
+  idUser            String?      @db.Uuid // livreur
+  vente             Vente        @relation(fields: [idVente], references: [id], onDelete: Cascade)
+  livreur           Utilisateur? @relation("LivreurLivraison", fields: [idUser], references: [id])
+
+  @@map("livraisons")
+}
+
+//
+// ==========================
+// PAIEMENT
+// ==========================
+model Paiement {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  mode           String // carte | mobile money | cash
+  montant        Decimal  @db.Decimal(12, 2)
+  datePaiement   DateTime @default(now())
+  statut         String   @default("en attente") // validé | échoué | remboursé
+  transaction_id String?
+  idVente        String   @unique @db.Uuid
+  vente          Vente    @relation(fields: [idVente], references: [id], onDelete: Cascade)
+
+  @@map("paiements")
+}

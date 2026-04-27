@@ -1,0 +1,5 @@
+{
+  "disabled": true,
+  "note": "Application en mode démo - Supabase désactivé",
+  "demo_mode": true
+}

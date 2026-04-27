@@ -1,0 +1,203 @@
+/* AdminDashboard.css */
+
+.sidebar {
+    /* border-right: 1px solid #ddd; */
+    background-color: #1F4F25;
+    display: flex;
+    flex-direction: column;
+    width: 250px;
+    color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-header {
+    padding: 20px;
+    /* border-bottom: 2px solid #1F4F25;  */
+    /* ligne séparatrice */
+}
+
+.sidebar-header h1 {
+    font-size: 18px;
+    margin-bottom: 4px;
+}
+
+.sidebar-header p {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 10px 0;
+}
+
+.sidebar-nav button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    border: none;
+    background: none;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.sidebar-nav button:hover {
+    background-color: #27683F;/* un vert légèrement foncé */
+}
+
+/* tab actif plus foncé */
+.sidebar-nav button.active {
+    background-color: #2E6E3B; /* vert foncé plus prononcé */
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-footer {
+    padding: 10px 20px;
+    border-top: 2px solid #1F4F25;
+    /* ligne séparatrice verte foncée */
+}
+
+.sidebar-footer button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    /* comme sidebar-nav button */
+    padding: 10px 20px;
+    /* même padding que les autres */
+    border: none;
+    border-radius: 0.5rem;
+    /* arrondi comme sidebar-nav */
+    background: none;
+    /* fond transparent */
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.sidebar-footer button:hover {
+    background-color: #27683F;
+    /* même hover que les autres boutons */
+}
+
+.sidebar-footer button:active {
+    background-color: #145A30;
+    /* effet "actif" si nécessaire */
+}
+
+.header-horizontal {
+    width: 100%;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid #e5e7eb;
+    padding: 8px 32px;
+    box-sizing: border-box;
+    position: relative;
+    top: 0;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-left h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+    color: #111827;
+}
+
+.header-left p {
+    font-size: 12px;
+    color: #6b7280;
+    margin: 4px 0 0 0;
+}
+
+.header-right p {
+    text-align: right;
+    margin: 0;
+    font-size: 14px;
+    color: #374151;
+}
+
+.header-right p+p {
+    font-size: 10px;
+    color: #9ca3af;
+    margin-top: 2px;
+}
+
+.section-card {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 24px;
+}
+
+/* Titre à l'intérieur des cartes */
+.section-card h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 16px;
+}
+
+/* Tableaux */
+.table-auto {
+    border-collapse: collapse;
+    /* fusionne les bordures */
+}
+
+.table-auto th,
+.table-auto td {
+    border-right: 1px solid #d1d5db;
+}
+
+/* On supprime la bordure droite de la dernière cellule pour éviter double trait */
+.table-auto th:last-child,
+.table-auto td:last-child {
+    border-right: none;
+}
+
+/* Hover reste identique */
+.table-auto tbody tr:hover {
+    background-color: #f1f5f9;
+}
+
+.table-auto thead {
+    background-color: #e5e7eb;
+    color: #374151;
+    border-right: 1px solid #e5e7eb;
+}
+
+.table-auto tbody tr:hover {
+    background-color: #f1f5f9;
+    /* léger hover pour repérer la ligne */
+}
+
+.table-auto tbody td {
+    vertical-align: middle;
+    /* alignement du contenu au centre */
+}
+
+/* Amélioration de la barre de recherche */
+.section-card input[type="text"] {
+    transition: all 0.2s ease-in-out;
+}
+
+.section-card input[type="text"]:focus {
+    box-shadow: 0 0 0 3px rgba(45, 138, 71, 0.1);
+}
+
+.sub-btn {
+    padding-left: 28px !important;
+    padding-right: 28px !important;
+}
